@@ -81,7 +81,7 @@ Her senkron dosyanın tamamını indirir; maliyetin çoğu TLS el sıkışmasıd
 
 - Windows'ta her senkron belirteç yeniler (oauth2 bağlantısı ≈ 5,5 KB), Android'de belirteci Play Services önbellekler (~3 KB, saatte en çok bir kez; ayrı uygulama olduğu için ölçüme girmez).
 - Kayıt başına: yüklemede +~240 B (sıkıştırılmaz), indirmede +30-65 B (gzip). 100 görev ≈ 23,5 KB ham / 3,2 KB gzip; 1000 görev ≈ 234 KB ham / 28 KB gzip. Silinenler (tombstone) hiç temizlenmediği için dosyada kalır (100 kayıt ≈ 22 KB ham).
-- Günlük tahmin (günde 15 değişiklik, telefon 20 kez açılıyor): Android ≈ 0,8-1 MB/gün (≈ 25-30 MB/ay), Windows pencere 10 saat açıksa ≈ 2 MB/gün (≈ 60 MB/ay), 24 saat açıksa ≈ 4 MB/gün (≈ 125 MB/ay). Toplam ≈ 90-150 MB/ay; çoğu boşta yapılan periyodik kontrollerin el sıkışmasıdır.
+- Günlük tahmin (günde 15 değişiklik, telefon 20 kez açılıyor): Android ≈ 0,9-1,4 MB/gün (≈ 27-42 MB/ay), Windows pencere 10 saat açıksa ≈ 2 MB/gün (≈ 57 MB/ay), 24 saat açıksa ≈ 4 MB/gün (≈ 122 MB/ay). Toplam ≈ 85-165 MB/ay; çoğu boşta yapılan periyodik kontrollerin el sıkışmasıdır.
 - Gerekirse azaltma yolları (uygulanmadı): Windows'ta erişim belirtecini ~50 dk önbelleğe almak (senkron başına −5,5 KB), Windows periyodunu 5 dk'dan 15 dk'ya çıkarmak (÷3), değişiklik yokken yalnızca sürüm sorgulamak, 90 günden eski tombstone'ları temizlemek.
 
 ## Windows uygulama notları (Aşama 6)
