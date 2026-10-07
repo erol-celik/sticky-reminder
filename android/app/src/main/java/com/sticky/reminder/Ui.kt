@@ -172,7 +172,12 @@ fun StickyApp(vm: StickyViewModel) {
                 onDismissRequest = { confirmSignOut = false },
                 containerColor = StickyColors.Bg,
                 title = { Text("Google hesabından çıkılsın mı?", color = StickyColors.Accent) },
-                text = { Text("Bu cihazdaki görevler silinmez; yalnızca senkron durur.", color = StickyColors.Ink) },
+                text = {
+                    Text(
+                        "Bu cihazdaki görevler silinmez; yalnızca bu cihazda senkron durur. Diğer cihazlar etkilenmez.",
+                        color = StickyColors.Ink,
+                    )
+                },
                 confirmButton = {
                     TextButton(onClick = {
                         confirmSignOut = false

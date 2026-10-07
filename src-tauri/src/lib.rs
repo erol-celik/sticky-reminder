@@ -142,18 +142,15 @@ async fn sign_in(paths: State<'_, Paths>) -> Res<()> {
     .map_err(|e| e.to_string())?
 }
 
-/// Oturumu kapatır: belirteci Google'a iptal ettirir ve bu bilgisayardan siler.
-/// Yerel görevlere dokunulmaz.
+/// Oturumu bu bilgisayarda kapatır: belirteci Kimlik Bilgisi Yöneticisi'nden siler. Yerel görevlere
+/// dokunulmaz. Google'daki izin **iptal edilmez**: izin tüm cihazlar için ortaktır (aynı Cloud
+/// projesi), iptal etmek telefondaki oturumu da düşürürdü. Tamamen kaldırmak için Google Hesabım >
+/// Güvenlik > Üçüncü taraf erişimi.
 #[tauri::command]
 async fn sign_out() -> Res<()> {
-    tauri::async_runtime::spawn_blocking(|| -> Res<()> {
-        if let Ok(Some(token)) = oauth::load_refresh_token() {
-            oauth::revoke(&oauth::agent(), &token);
-        }
-        oauth::delete_refresh_token()
-    })
-    .await
-    .map_err(|e| e.to_string())?
+    tauri::async_runtime::spawn_blocking(oauth::delete_refresh_token)
+        .await
+        .map_err(|e| e.to_string())?
 }
 
 #[derive(Serialize)]

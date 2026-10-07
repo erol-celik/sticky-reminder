@@ -115,7 +115,13 @@ export function createSync({ onChange, onSynced }: Hooks) {
   }
 
   async function signOut() {
-    if (!window.confirm("Google hesabından çıkılsın mı? Bu cihazdaki görevler silinmez.")) return;
+    if (
+      !window.confirm(
+        "Çıkılsın mı? Bu cihazdaki görevler silinmez; yalnızca bu cihazda senkron durur. Diğer cihazlar etkilenmez.",
+      )
+    ) {
+      return;
+    }
     try {
       await api.signOut();
     } catch (e) {

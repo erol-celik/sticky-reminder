@@ -70,6 +70,26 @@ Her cihazda yerel veritabanı asıl kaynaktır; Drive yalnızca cihazlar arasın
 - [x] Android sürümü ve telefon: Samsung Galaxy A24 (SM-A245F), Android 16. minSdk 26.
 - [x] Uygulama adı: "Sticky" (Android'de ikon adı; paket `com.sticky.reminder`, Windows ürün adı `sticky-reminder`).
 
+## Veri kullanımı (ölçüldü, Ekim 2026; dosyada ~25 kayıt, ~5,5 KB)
+
+Her senkron dosyanın tamamını indirir; maliyetin çoğu TLS el sıkışmasıdır, görev sayısı değil.
+
+| Senkron türü | Windows (TLS yükü, 2 bağlantı) | Android (IP düzeyi, TrafficStats) |
+| --- | --- | --- |
+| Değişiklik yok | ~13 KB (↑2,2 ↓11,1) | ~4,5 KB sıcak, ~9,5 KB soğuk (uygulama açılışı) |
+| Yükleme (ekle/sil/yapıldı) | ~20 KB (↑8,1 ↓12,4) | ~12,5 KB (↑7,8 ↓4,7) |
+
+- Windows'ta her senkron belirteç yeniler (oauth2 bağlantısı ≈ 5,5 KB), Android'de belirteci Play Services önbellekler (~3 KB, saatte en çok bir kez; ayrı uygulama olduğu için ölçüme girmez).
+- Kayıt başına: yüklemede +~240 B (sıkıştırılmaz), indirmede +30-65 B (gzip). 100 görev ≈ 23,5 KB ham / 3,2 KB gzip; 1000 görev ≈ 234 KB ham / 28 KB gzip. Silinenler (tombstone) hiç temizlenmediği için dosyada kalır (100 kayıt ≈ 22 KB ham).
+- Günlük tahmin (günde 15 değişiklik, telefon 20 kez açılıyor): Android ≈ 0,8-1 MB/gün (≈ 25-30 MB/ay), Windows pencere 10 saat açıksa ≈ 2 MB/gün (≈ 60 MB/ay), 24 saat açıksa ≈ 4 MB/gün (≈ 125 MB/ay). Toplam ≈ 90-150 MB/ay; çoğu boşta yapılan periyodik kontrollerin el sıkışmasıdır.
+- Gerekirse azaltma yolları (uygulanmadı): Windows'ta erişim belirtecini ~50 dk önbelleğe almak (senkron başına −5,5 KB), Windows periyodunu 5 dk'dan 15 dk'ya çıkarmak (÷3), değişiklik yokken yalnızca sürüm sorgulamak, 90 günden eski tombstone'ları temizlemek.
+
+## Windows uygulama notları (Aşama 6)
+
+- Kurulum: `src-tauri/target/release/bundle/nsis/sticky-reminder_0.1.0_x64-setup.exe` (~2,4 MB, yalnızca bu kullanıcı için, Türkçe). Google ayarı `%APPDATA%\com.sticky.reminder\oauth.json` içinde olmalıdır (git'e girmez).
+- Otomatik başlama: `HKCU\...\Run\Sticky`. Kurulu sürümün ilk çalıştırmasında açılır, sonra başlık çubuğundaki ⏻ düğmesiyle açılıp kapatılır; geliştirme sürümü kayıt defterine yazmaz. Kaldırırken `installer-hooks.nsh` girdiyi siler; veri ve Google girişi korunur.
+- Çıkış (Windows ve Android) yalnızca bu cihazda geçerlidir. Google'daki izin tüm cihazlar için ortaktır (aynı Cloud projesi), belirteci iptal etmek diğer cihazı da çıkarır (denendi); bu yüzden çıkışta iptal yapılmaz. Tamamen kaldırmak için Google Hesabım > Güvenlik > Üçüncü taraf erişimi.
+
 ## Widget uygulama notları (Aşama 5)
 
 - Jetpack Glance (`glance-appwidget` 1.2.0). Varsayılan 4×4 hücre (Samsung'ta 4×3 yerleşti), yeniden boyutlandırılabilir, `updatePeriodMillis` 30 dk.

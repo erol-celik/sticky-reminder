@@ -137,17 +137,16 @@ class StickyViewModel(private val app: Application) : AndroidViewModel(app) {
         }
     }
 
-    /** Çıkış: bekleyen senkronları durdurur, Google'a erişimi iptal ettirir. Yerel görevlere dokunulmaz. */
+    /**
+     * Çıkış: bu cihazda senkronu durdurur. Yerel görevlere ve Google'daki izne dokunulmaz;
+     * izin diğer cihazlarla ortaktır, iptal etmek onları da çıkarırdı.
+     */
     fun signOut() {
         prefs.signedIn = false
         prefs.lastOkAt = 0
         prefs.lastError = null
         WorkManager.getInstance(app).cancelAllWorkByTag(SyncScheduler.TAG)
-        viewModelScope.launch {
-            if (!GoogleAuth.revoke(app)) {
-                prefs.lastError = "Senkron durduruldu; Google erişimi iptal edilemedi (Google Hesabım > Güvenlik'ten kaldırabilirsin)"
-            }
-        }
+        viewModelScope.launch { GoogleAuth.forgetCachedToken(app) }
     }
 
     private fun completeSignIn() {

@@ -9,14 +9,9 @@ import com.google.android.gms.auth.api.identity.ClearTokenRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.common.api.Scope
 import com.google.android.gms.tasks.Task
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLEncoder
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlinx.coroutines.withContext
 
 /**
  * Drive yetkisi: Play Services `AuthorizationClient`. İlk seferde izin ekranı çıkar; sonrasında
@@ -61,37 +56,16 @@ object GoogleAuth {
             ?: throw IllegalStateException("Google erişim belirteci vermedi")
 
     /**
-     * Çıkış: Google'a bu uygulamanın erişimini iptal ettirir. Zaten izin yoksa ya da iptal
-     * edilemezse false döner; bu durumda erişim Google Hesabım'dan kaldırılabilir.
+     * Çıkışta bu cihazdaki önbellekli erişim belirtecini siler. Google tarafındaki izin
+     * **iptal edilmez**: izin tüm cihazlar için ortaktır (aynı Cloud projesi), iptal etmek
+     * Windows'taki oturumu da düşürürdü. Tamamen kaldırmak için Google Hesabım > Güvenlik.
      */
-    suspend fun revoke(context: Context): Boolean = try {
-        val result = rawAuthorize(context)
-        val token = result.accessToken
-        if (result.hasResolution() || token == null) {
-            true // izin ekranı gerekiyorsa uygulamanın zaten erişimi yoktur
-        } else {
-            // Play Services' revokeAccess hesap bilgisi ister ve bu yapılandırmada vermez; erişim
-            // belirtecini Google'ın iptal uç noktasına göndermek aynı izni geri alır.
-            val revoked = withContext(Dispatchers.IO) { revokeToken(token) }
+    suspend fun forgetCachedToken(context: Context) {
+        try {
+            val token = rawAuthorize(context).takeUnless { it.hasResolution() }?.accessToken ?: return
             client(context).clearToken(ClearTokenRequest.builder().setToken(token).build()).await()
-            revoked
-        }
-    } catch (e: Exception) {
-        false
-    }
-
-    private fun revokeToken(token: String): Boolean {
-        val connection = URL("https://oauth2.googleapis.com/revoke").openConnection() as HttpURLConnection
-        return try {
-            connection.requestMethod = "POST"
-            connection.doOutput = true
-            connection.connectTimeout = 15_000
-            connection.readTimeout = 15_000
-            connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
-            connection.outputStream.use { it.write("token=${URLEncoder.encode(token, "UTF-8")}".toByteArray()) }
-            connection.responseCode == 200
-        } finally {
-            connection.disconnect()
+        } catch (_: Exception) {
+            // Önbellek temizliği en iyi çabadır; çıkış yerelde zaten tamamlandı.
         }
     }
 }

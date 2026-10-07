@@ -20,7 +20,6 @@ pub const SIGNED_OUT: &str = "SIGNED_OUT: yeniden giriş gerekli";
 
 const AUTH_URL: &str = "https://accounts.google.com/o/oauth2/v2/auth";
 const TOKEN_URL: &str = "https://oauth2.googleapis.com/token";
-const REVOKE_URL: &str = "https://oauth2.googleapis.com/revoke";
 const KEYRING_SERVICE: &str = "com.sticky.reminder";
 const KEYRING_USER: &str = "google-refresh-token";
 
@@ -346,11 +345,6 @@ pub fn refresh_access_token(
         ],
     )?;
     Ok(response.access_token)
-}
-
-/// Çıkışta Google'a belirteci iptal ettirir (en iyi çaba; hata görmezden gelinir).
-pub fn revoke(agent: &ureq::Agent, token: &str) {
-    let _ = http::finish(agent.post(REVOKE_URL).send_form([("token", token)]));
 }
 
 // --- Yenileme belirtecinin saklanması ------------------------------------------------------------

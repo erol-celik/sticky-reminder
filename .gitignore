@@ -13,3 +13,4 @@ android/.kotlin/
 *.keystore
 *.jks
 .claude/
+release/
