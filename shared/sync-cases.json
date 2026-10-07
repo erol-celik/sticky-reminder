@@ -1,0 +1,189 @@
+{
+  "_doc": [
+    "Birleştirme senaryoları: hem src-tauri (Rust) hem android (Kotlin) testleri bu dosyayı okur.",
+    "Kural: görev bazında en yeni updatedAt kazanır. Eşitlikte silinmiş (deleted) olan kazanır,",
+    "o da değilse uzaktaki (remote) sürüm kazanır. merged listesi id'ye göre sıralıdır.",
+    "uploadNeeded: birleşik sonuç uzaktaki dosyadan farklıysa true.",
+    "applyLocal: yerel veritabanına yazılması gereken (yerelden farklı) görevlerin id'leri."
+  ],
+  "cases": [
+    {
+      "name": "yalnizca_yerel",
+      "local": [
+        {"id":"a","title":"A","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100}
+      ],
+      "remote": [],
+      "expect": {
+        "merged": [
+          {"id":"a","title":"A","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100}
+        ],
+        "uploadNeeded": true,
+        "applyLocal": []
+      }
+    },
+    {
+      "name": "yalnizca_uzak",
+      "local": [],
+      "remote": [
+        {"id":"b","title":"B","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100}
+      ],
+      "expect": {
+        "merged": [
+          {"id":"b","title":"B","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100}
+        ],
+        "uploadNeeded": false,
+        "applyLocal": ["b"]
+      }
+    },
+    {
+      "name": "ayni_iki_tarafta",
+      "local": [
+        {"id":"a","title":"A","notes":"n","color":"pink","tags":["x"],"deadline":"01.01.2027","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100}
+      ],
+      "remote": [
+        {"id":"a","title":"A","notes":"n","color":"pink","tags":["x"],"deadline":"01.01.2027","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100}
+      ],
+      "expect": {
+        "merged": [
+          {"id":"a","title":"A","notes":"n","color":"pink","tags":["x"],"deadline":"01.01.2027","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100}
+        ],
+        "uploadNeeded": false,
+        "applyLocal": []
+      }
+    },
+    {
+      "name": "yerel_daha_yeni",
+      "local": [
+        {"id":"a","title":"yerel","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":200}
+      ],
+      "remote": [
+        {"id":"a","title":"uzak","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100}
+      ],
+      "expect": {
+        "merged": [
+          {"id":"a","title":"yerel","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":200}
+        ],
+        "uploadNeeded": true,
+        "applyLocal": []
+      }
+    },
+    {
+      "name": "uzak_daha_yeni",
+      "local": [
+        {"id":"a","title":"yerel","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100}
+      ],
+      "remote": [
+        {"id":"a","title":"uzak","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":200}
+      ],
+      "expect": {
+        "merged": [
+          {"id":"a","title":"uzak","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":200}
+        ],
+        "uploadNeeded": false,
+        "applyLocal": ["a"]
+      }
+    },
+    {
+      "name": "esit_zaman_uzak_kazanir",
+      "local": [
+        {"id":"a","title":"yerel","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100}
+      ],
+      "remote": [
+        {"id":"a","title":"uzak","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100}
+      ],
+      "expect": {
+        "merged": [
+          {"id":"a","title":"uzak","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100}
+        ],
+        "uploadNeeded": false,
+        "applyLocal": ["a"]
+      }
+    },
+    {
+      "name": "esit_zaman_silinmis_kazanir",
+      "local": [
+        {"id":"a","title":"x","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":true,"updatedAt":100}
+      ],
+      "remote": [
+        {"id":"a","title":"x","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100}
+      ],
+      "expect": {
+        "merged": [
+          {"id":"a","title":"x","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":true,"updatedAt":100}
+        ],
+        "uploadNeeded": true,
+        "applyLocal": []
+      }
+    },
+    {
+      "name": "silme_uzak_duzenlemeden_yeni",
+      "local": [
+        {"id":"a","title":"x","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":true,"updatedAt":300}
+      ],
+      "remote": [
+        {"id":"a","title":"duzenlendi","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":200}
+      ],
+      "expect": {
+        "merged": [
+          {"id":"a","title":"x","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":true,"updatedAt":300}
+        ],
+        "uploadNeeded": true,
+        "applyLocal": []
+      }
+    },
+    {
+      "name": "duzenleme_silmeden_yeni",
+      "local": [
+        {"id":"a","title":"x","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":true,"updatedAt":200}
+      ],
+      "remote": [
+        {"id":"a","title":"duzenlendi","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":300}
+      ],
+      "expect": {
+        "merged": [
+          {"id":"a","title":"duzenlendi","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":300}
+        ],
+        "uploadNeeded": false,
+        "applyLocal": ["a"]
+      }
+    },
+    {
+      "name": "tum_alanlar_yerelden_gider",
+      "local": [
+        {"id":"a","title":"su iç","notes":"iki bardak","color":"navy","tags":["ev","sağlık"],"deadline":"","recurring":true,"recurrence":"weekly","done":true,"doneAt":500,"deleted":false,"updatedAt":600}
+      ],
+      "remote": [],
+      "expect": {
+        "merged": [
+          {"id":"a","title":"su iç","notes":"iki bardak","color":"navy","tags":["ev","sağlık"],"deadline":"","recurring":true,"recurrence":"weekly","done":true,"doneAt":500,"deleted":false,"updatedAt":600}
+        ],
+        "uploadNeeded": true,
+        "applyLocal": []
+      }
+    },
+    {
+      "name": "karisik",
+      "local": [
+        {"id":"a","title":"A1","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":200},
+        {"id":"b","title":"B","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100},
+        {"id":"c","title":"C","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":true,"updatedAt":150}
+      ],
+      "remote": [
+        {"id":"a","title":"A0","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100},
+        {"id":"b","title":"B","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100},
+        {"id":"c","title":"C","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100},
+        {"id":"d","title":"D","notes":"","color":"green","tags":["x"],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":50}
+      ],
+      "expect": {
+        "merged": [
+          {"id":"a","title":"A1","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":200},
+          {"id":"b","title":"B","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":100},
+          {"id":"c","title":"C","notes":"","color":"blue","tags":[],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":true,"updatedAt":150},
+          {"id":"d","title":"D","notes":"","color":"green","tags":["x"],"deadline":"","recurring":false,"recurrence":null,"done":false,"doneAt":null,"deleted":false,"updatedAt":50}
+        ],
+        "uploadNeeded": true,
+        "applyLocal": ["d"]
+      }
+    }
+  ]
+}

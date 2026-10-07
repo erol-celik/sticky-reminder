@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sticky-reminder</title>
+  </head>
+  <body>
+    <div id="app">
+      <header data-tauri-drag-region>
+        <span class="brand" data-tauri-drag-region>Sticky</span>
+        <span class="win-buttons">
+          <button id="autostart" hidden aria-label="Windows açılışında otomatik başlat">&#9211;</button>
+          <button id="min" title="Küçült" aria-label="Küçült">&#8211;</button>
+          <button id="close" title="Kapat" aria-label="Kapat">&#215;</button>
+        </span>
+      </header>
+      <form id="add-form">
+        <input id="add-input" placeholder="Yeni görev, Enter ile ekle" autocomplete="off" />
+      </form>
+      <nav id="filters"></nav>
+      <main id="list"></main>
+      <footer>
+        <div class="status">
+          <span id="pending"></span>
+          <span id="sync-status"></span>
+        </div>
+        <span class="actions">
+          <button id="signout" hidden title="Google hesabından çık">Çıkış</button>
+          <button id="save" disabled>Kaydet</button>
+        </span>
+      </footer>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Sticky</string>
+    <string name="widget_description">Görev listesi: yapıldı, sil ve ekle ana ekrandan</string>
+</resources>
